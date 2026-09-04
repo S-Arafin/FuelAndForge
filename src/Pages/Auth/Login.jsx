@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiChevronLeft } from 'react-icons/fi';
 import { FaApple, FaFacebook } from 'react-icons/fa';
@@ -16,7 +16,7 @@ const Login = () => {
     const handleLogin = (e) => {
         e.preventDefault();
         if (login(email, password)) {
-            navigate('/');
+            navigate('/dashboard');
         }
     };
 
