@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { NavLink } from 'react-router';
 import { HiHome, HiChartBar, HiUser } from 'react-icons/hi';
 import { IoBarbellOutline, IoNutritionOutline } from 'react-icons/io5';
 
 const BottomNav = () => {
-  const [activeTab, setActiveTab] = useState('Home');
-
   const navItems = [
-    { name: 'Home', icon: HiHome },
-    { name: 'Workouts', icon: IoBarbellOutline },
-    { name: 'Nutrition', icon: IoNutritionOutline },
-    { name: 'Analytics', icon: HiChartBar },
-    { name: 'Profile', icon: HiUser },
+    { name: 'Home', path: '/dashboard/home', icon: HiHome },
+    { name: 'Workouts', path: '/dashboard/workouts', icon: IoBarbellOutline },
+    { name: 'Nutrition', path: '/dashboard/nutrition', icon: IoNutritionOutline },
+    { name: 'Analytics', path: '/dashboard/analytics', icon: HiChartBar },
+    { name: 'Profile', path: '/dashboard/profile', icon: HiUser },
   ];
 
   return (
-    <div className="btm-nav p-4 md:hidden bg-base-200 flex justify-between items-center border-t border-base-300 z-50">
+    <div className="btm-nav p-4 md:hidden fixed bg-base-200 flex bottom-0 left-0 right-0 justify-between items-center border-t border-base-300 z-50">
       {navItems.map((item) => {
         const Icon = item.icon;
-        const isActive = activeTab === item.name;
         return (
-          <button
+          <NavLink
             key={item.name}
-            type="button"
-            onClick={() => setActiveTab(item.name)}
-            className="{isActive ? 'text-primary active' : 'text-base-content/60'} p-5"
+            to={item.path}
+            end={item.path === '/dashboard/home'}
+            className="{({ isActive }) =>
+              isActive ? 'text-primary active' : 'text-base-content/60 hover:text-base-content'
+            } p-5"
           >
             <Icon className="text-xl" />
-          </button>
+          </NavLink>
         );
       })}
     </div>
