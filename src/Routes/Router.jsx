@@ -7,6 +7,11 @@ import Register from "../Pages/Auth/register";
 import PrivateRoute from "../Provider/PrivateRoute";
 import Home from "../Pages/AuthRequired/Home";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import Workout from "../Pages/AuthRequired/Workout";
+import Calisthenics from "../Pages/AuthRequired/Calisthenics";
+import HomeWorkout from "../Pages/AuthRequired/HomeWorkout";
+import WeightTraining from "../Pages/AuthRequired/WeightTraining";
+
 
 export const router = createBrowserRouter([
     {
@@ -46,7 +51,30 @@ export const router = createBrowserRouter([
       {
         path: "home", // Loads Home on /dashboard/home
         element: <Home />
-      }
+      },
+       {
+        path:"workouts",
+        children:[
+            {
+                index:true,
+                element:<Workout/>
+            },
+            {
+                path:"weight-training",
+                element:<WeightTraining/>
+
+            },
+            {
+                path:"calisthenics",
+                element:<Calisthenics />
+            },
+            {
+                path:"home-workout",
+                element:<HomeWorkout />
+            }
+
+        ]
+      },
     ]
 
     }
