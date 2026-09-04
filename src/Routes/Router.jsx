@@ -11,6 +11,7 @@ import Workout from "../Pages/AuthRequired/Workout";
 import Calisthenics from "../Pages/AuthRequired/Calisthenics";
 import HomeWorkout from "../Pages/AuthRequired/HomeWorkout";
 import WeightTraining from "../Pages/AuthRequired/WeightTraining";
+import Analytics from "../Pages/AuthRequired/Analytics";
 
 
 export const router = createBrowserRouter([
@@ -74,6 +75,10 @@ export const router = createBrowserRouter([
             }
 
         ]
+      },
+       {
+        path:"analytics",
+        element:<Analytics />
       },
     ]
 
