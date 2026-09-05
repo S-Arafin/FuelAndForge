@@ -13,6 +13,8 @@ import HomeWorkout from "../Pages/AuthRequired/HomeWorkout";
 import WeightTraining from "../Pages/AuthRequired/WeightTraining";
 import Analytics from "../Pages/AuthRequired/Analytics";
 import Nutrition from "../Pages/AuthRequired/Nutrition";
+import Profile from "../Pages/AuthRequired/Profile";
+import BodyStats from "../Pages/AuthRequired/BodyStats";
 
 
 export const router = createBrowserRouter([
@@ -85,6 +87,17 @@ export const router = createBrowserRouter([
                 path: "analytics",
                 element: <Analytics />
             },
+            {
+                path: "profile",
+                element: <Profile />,
+                children: [
+                    {
+                        path: "body-status",
+                        element: <BodyStats />
+                    },
+                    
+                ]
+            }
         ]
 
     }
