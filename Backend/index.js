@@ -16,7 +16,7 @@ mongoose
   .catch((error) => {
     console.log("MongoDB connection error:", error.message);
   });
-  
+
 // Home Route
 app.get("/", (req, res) => {
   res.send("FuelAndForge server is running");
@@ -161,6 +161,146 @@ app.delete("/api/foods/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Food deleted successfully",
+    });
+  }
+});
+// meal schema
+const mealSchema = new mongoose.Schema(
+  {
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+
+    mealType: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    foods: [
+      {
+        foodId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Food",
+          required: true,
+        },
+
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+
+    notes: {
+      type: String,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+const Meal = mongoose.model("Meal", mealSchema);
+// create meal
+app.post("/api/meals", async (req, res) => {
+  try {
+    const meal = await Meal.create(req.body);
+
+    res.status(201).json({
+      message: "Meal logged successfully",
+      meal,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to log meal",
+      error: error.message,
+    });
+  }
+});
+// get all meals
+app.get("/api/meals", async (req, res) => {
+  try {
+    const meals = await Meal.find()
+      .sort({ date: -1 })
+      .populate("foods.foodId");
+
+    res.status(200).json(meals);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to get meals",
+      error: error.message,
+    });
+  }
+});
+// single meals
+app.get("/api/meals/:id", async (req, res) => {
+  try {
+    const meal = await Meal.findById(req.params.id)
+      .populate("foods.foodId");
+
+    if (!meal) {
+      return res.status(404).json({
+        message: "Meal not found",
+      });
+    }
+
+    res.status(200).json(meal);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to get meal",
+      error: error.message,
+    });
+  }
+});
+// update meals
+app.put("/api/meals/:id", async (req, res) => {
+  try {
+    const meal = await Meal.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!meal) {
+      return res.status(404).json({
+        message: "Meal not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Meal updated successfully",
+      meal,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update meal",
+      error: error.message,
+    });
+  }
+});
+//delete meals
+app.delete("/api/meals/:id", async (req, res) => {
+  try {
+    const meal = await Meal.findByIdAndDelete(req.params.id);
+
+    if (!meal) {
+      return res.status(404).json({
+        message: "Meal not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Meal deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete meal",
+      error: error.message,
     });
   }
 });
