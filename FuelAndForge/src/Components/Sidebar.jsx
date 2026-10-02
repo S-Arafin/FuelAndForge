@@ -8,14 +8,6 @@ import {
 import { IoBarbellOutline, IoNutritionOutline } from 'react-icons/io5';
 
 const Sidebar = () => {
-  const navItems = [
-    { name: 'Home', path: '/dashboard/home', icon: HiHome },
-    { name: 'Workouts', path: '/dashboard/workouts', icon: IoBarbellOutline },
-    { name: 'Nutrition', path: '/dashboard/nutrition', icon: IoNutritionOutline },
-    { name: 'Analytics', path: '/dashboard/analytics', icon: HiChartBar },
-    { name: 'Profile', path: '/dashboard/profile', icon: HiUser },
-  ];
-
   return (
     <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen bg-base-200 text-base-content border-r border-base-300 p-4 sticky top-0 justify-between shrink-0">
       {/* User Info & Navigation */}
@@ -42,26 +34,136 @@ const Sidebar = () => {
 
         {/* Navigation Links */}
         <nav className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                end={item.path === '/dashboard/home'}
-                className={({ isActive }) =>
-                  `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
-                    isActive
-                      ? 'bg-primary text-primary-content shadow-md'
-                      : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
-                  }`
-                }
-              >
-                <Icon className="text-xl" />
-                <span>{item.name}</span>
-              </NavLink>
-            );
-          })}
+
+          {/* Dashboard */}
+          <NavLink
+            to="/dashboard/home"
+            end
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-primary text-primary-content shadow-md'
+                  : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+              }`
+            }
+          >
+            <HiHome className="text-xl" />
+            <span>Dashboard</span>
+          </NavLink>
+
+
+          {/* Workout */}
+          <div className="mt-3">
+          <NavLink
+            to="/dashboard/workout"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-primary text-primary-content shadow-md'
+                  : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+              }`
+            }
+          >
+            <IoBarbellOutline className="text-lg" />
+              <span>Workout</span>
+          </NavLink>
+          
+
+            
+
+            {/* Exercises */}
+            <NavLink
+              to="/dashboard/workouts"
+              end
+              className={({ isActive }) =>
+                `w-full flex items-center gap-3 pl-11 pr-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary text-primary-content shadow-md'
+                    : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+                }`
+              }
+            >
+              <span>Exercises</span>
+            </NavLink>
+
+            {/* Routines */}
+            <NavLink
+              to="/dashboard/workouts/routine"
+              className={({ isActive }) =>
+                `w-full flex items-center gap-3 pl-11 pr-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary text-primary-content shadow-md'
+                    : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+                }`
+              }
+            >
+              <span>Routines</span>
+            </NavLink>
+
+            {/* Workout History */}
+            <NavLink
+              to="/dashboard/workouts/history"
+              className={({ isActive }) =>
+                `w-full flex items-center gap-3 pl-11 pr-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary text-primary-content shadow-md'
+                    : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+                }`
+              }
+            >
+              <span>Workout History</span>
+            </NavLink>
+
+          </div>
+
+
+          {/* Nutrition */}
+          <NavLink
+            to="/dashboard/nutrition"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-primary text-primary-content shadow-md'
+                  : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+              }`
+            }
+          >
+            <IoNutritionOutline className="text-xl" />
+            <span>Nutrition</span>
+          </NavLink>
+
+
+          {/* Analytics */}
+          <NavLink
+            to="/dashboard/analytics"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-primary text-primary-content shadow-md'
+                  : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+              }`
+            }
+          >
+            <HiChartBar className="text-xl" />
+            <span>Analytics</span>
+          </NavLink>
+
+
+          {/* Profile */}
+          <NavLink
+            to="/dashboard/profile"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                isActive
+                  ? 'bg-primary text-primary-content shadow-md'
+                  : 'hover:bg-base-300 text-base-content/80 hover:text-base-content'
+              }`
+            }
+          >
+            <HiUser className="text-xl" />
+            <span>Profile</span>
+          </NavLink>
+
         </nav>
       </div>
     </aside>
