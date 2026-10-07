@@ -800,6 +800,172 @@ app.delete("/api/meals/:id", async (req, res) => {
   }
 });
 
+// body stats schema
+ const bodyStatsSchema = new mongoose.Schema(
+  {
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+
+    weight: {
+      type: Number,
+      required: true,
+    },
+
+    bmi: {
+      type: Number,
+      default: 0,
+    },
+
+    chest: {
+      type: Number,
+      default: 0,
+    },
+
+    waist: {
+      type: Number,
+      default: 0,
+    },
+
+    arms: {
+      type: Number,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+const BodyStats = mongoose.model("BodyStats", bodyStatsSchema);
+// create body stats 
+app.post("/api/body-stats", async (req, res) => {
+  try {
+    const bodyStats = await BodyStats.create(req.body);
+
+    res.status(201).json({
+      message: "Body stats added successfully",
+      bodyStats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to add body stats",
+      error: error.message,
+    });
+  }
+});
+// get body stats
+app.get("/api/body-stats", async (req, res) => {
+  try {
+    const stats = await BodyStats.find().sort({ date: -1 });
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to get body stats",
+      error: error.message,
+    });
+  }
+});
+// single body stats
+app.get("/api/body-stats/:id", async (req, res) => {
+  try {
+    const stats = await BodyStats.findById(req.params.id);
+
+    if (!stats) {
+      return res.status(404).json({
+        message: "Body stats not found",
+      });
+    }
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to get body stats",
+      error: error.message,
+    });
+  }
+});
+
+// update body stats
+app.put("/api/body-stats/:id", async (req, res) => {
+  try {
+    const stats = await BodyStats.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!stats) {
+      return res.status(404).json({
+        message: "Body stats not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Body stats updated successfully",
+      stats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update body stats",
+      error: error.message,
+    });
+  }
+});
+// delete body stats
+app.delete("/api/body-stats/:id", async (req, res) => {
+  try {
+    const stats = await BodyStats.findByIdAndDelete(req.params.id);
+
+    if (!stats) {
+      return res.status(404).json({
+        message: "Body stats not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Body stats deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete body stats",
+      error: error.message,
+    });
+  }
+});
+
+// dashboard summary 
+app.get("/api/dashboard", async (req, res) => {
+  try {
+    const totalExercises = await Exercise.countDocuments();
+    const totalRoutines = await Routine.countDocuments();
+    const totalWorkouts = await Workout.countDocuments();
+    const totalFoods = await Food.countDocuments();
+    const totalMeals = await Meal.countDocuments();
+
+    const latestBodyStats = await BodyStats.findOne()
+      .sort({ date: -1 });
+
+    res.status(200).json({
+      totalExercises,
+      totalRoutines,
+      totalWorkouts,
+      totalFoods,
+      totalMeals,
+      latestBodyStats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to load dashboard",
+      error: error.message,
+    });
+  }
+});
+
 // Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
