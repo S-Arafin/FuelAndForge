@@ -7,14 +7,14 @@ import Register from "../Pages/Auth/register";
 import PrivateRoute from "../Provider/PrivateRoute";
 import Home from "../Pages/AuthRequired/Home";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import Workout from "../Pages/AuthRequired/Workout";
+import Calisthenics from "../Pages/AuthRequired/Calisthenics";
+import HomeWorkout from "../Pages/AuthRequired/HomeWorkout";
+import WeightTraining from "../Pages/AuthRequired/WeightTraining";
 import Analytics from "../Pages/AuthRequired/Analytics";
 import Nutrition from "../Pages/AuthRequired/Nutrition";
 import Profile from "../Pages/AuthRequired/Profile";
 import BodyStats from "../Pages/AuthRequired/BodyStats";
-import Exercises from "../Pages/AuthRequired/Exercises";
-import Routine from "../Pages/AuthRequired/Routine";
-import WorkoutHistory from "../Pages/AuthRequired/WorkoutHistory";
-import Workout from "../Pages/AuthRequired/Workout";
 
 
 export const router = createBrowserRouter([
@@ -57,27 +57,25 @@ export const router = createBrowserRouter([
                 element: <Home />
             },
             {
-                path: "workout",
-                element: <Workout />,
-            },
-            {
                 path: "workouts",
                 children: [
                     {
                         index: true,
-                        element: <Exercises />
+                        element: <Workout />
                     },
                     {
-                        path: "routine",
-                        element: <Routine />
+                        path: "weight-training",
+                        element: <WeightTraining />
 
                     },
                     {
-                        path: "history",
-                        element: <WorkoutHistory />
+                        path: "calisthenics",
+                        element: <Calisthenics />
                     },
-
-
+                    {
+                        path: "home-workout",
+                        element: <HomeWorkout />
+                    }
 
                 ]
             },
