@@ -1,174 +1,514 @@
-import React from 'react';
-import { Link, Outlet, useLocation } from 'react-router';
-import { 
-  HiCamera, 
-  HiChevronRight, 
-  HiCog, 
-  HiBell, 
-  HiQuestionMarkCircle, 
-  HiLogout 
-} from 'react-icons/hi';
-import { LuScale, LuTrophy, LuDumbbell } from 'react-icons/lu';
+import { useEffect, useState } from "react";
+import { HiChevronLeft, HiPlus } from "react-icons/hi";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import { useNavigate } from "react-router";
+
+const API = "http://localhost:3000/api";
 
 const Profile = () => {
-  const location = useLocation();
+  const navigate = useNavigate();
 
-  const stats = [
-    { label: 'WORKOUTS', value: '124', color: 'text-primary' },
-    { label: 'STREAK', value: '14', color: 'text-secondary' },
-    { label: 'PRS', value: '32', color: 'text-accent' },
-  ];
+  const [bodyStats, setBodyStats] = useState([]);
+  const [totalWorkouts, setTotalWorkouts] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
 
-  const menuOptions = [
-    {
-      id: 'body-stats',
-      title: 'Body Stats',
-      path: '/dashboard/profile/body-status', // Navigates to the body-status child route
-      icon: LuScale,
-      iconBg: 'bg-primary/10 text-primary',
-    },
-    {
-      id: 'achievement',
-      title: 'Achievement',
-      path: '/dashboard/profile/achievement',
-      icon: LuTrophy,
-      iconBg: 'bg-secondary/10 text-secondary',
-    },
-    {
-      id: 'my-equipments',
-      title: 'My Equipments',
-      path: '/dashboard/profile/my-equipments',
-      icon: LuDumbbell,
-      iconBg: 'bg-accent/10 text-accent',
-    },
-    {
-      id: 'app-settings',
-      title: 'App Settings',
-      path: '/dashboard/profile/settings',
-      icon: HiCog,
-      iconBg: 'bg-base-300 text-base-content/70',
-    },
-    {
-      id: 'reminders',
-      title: 'Reminders',
-      path: '/dashboard/profile/reminders',
-      icon: HiBell,
-      iconBg: 'bg-primary/10 text-primary',
-    },
-    {
-      id: 'help-support',
-      title: 'Help & Support',
-      path: '/dashboard/profile/support',
-      icon: HiQuestionMarkCircle,
-      iconBg: 'bg-base-300 text-base-content/70',
-    },
-  ];
+  const [formData, setFormData] = useState({
+    weight: "",
+    bmi: "",
+    chest: "",
+    waist: "",
+    arms: "",
+  });
 
-  const handleSignOut = () => {
-    console.log('User signed out');
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+
+      const [bodyStatsResponse, dashboardResponse] = await Promise.all([
+        fetch(`${API}/body-stats`),
+        fetch(`${API}/dashboard`),
+      ]);
+
+      const bodyStatsData = await bodyStatsResponse.json();
+      const dashboardData = await dashboardResponse.json();
+
+      setBodyStats(bodyStatsData);
+      setTotalWorkouts(dashboardData.totalWorkouts || 0);
+    } catch (error) {
+      console.error("Profile data error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // If currently viewing a child route (e.g., /dashboard/profile/body-status), render the child component via Outlet
-  const isChildRoute = location.pathname !== '/dashboard/profile';
+  const sortedStats = [...bodyStats].sort(
+    (a, b) => new Date(a.date) - new Date(b.date)
+  );
 
-  if (isChildRoute) {
-    return <Outlet />;
-  }
+  const latestStats =
+    sortedStats.length > 0
+      ? sortedStats[sortedStats.length - 1]
+      : null;
+
+  const previousStats =
+    sortedStats.length > 1
+      ? sortedStats[sortedStats.length - 2]
+      : null;
+
+  const weightData = sortedStats.map((item) => ({
+    date: new Date(item.date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+    }),
+    weight: item.weight,
+  }));
+
+  const getChange = (current, previous, unit = "") => {
+    if (
+      current === undefined ||
+      current === null ||
+      previous === undefined ||
+      previous === null
+    ) {
+      return "No previous data";
+    }
+
+    const change = Number(current) - Number(previous);
+
+    if (change === 0) {
+      return "No change";
+    }
+
+    const sign = change > 0 ? "+" : "";
+
+    return `${sign}${change.toFixed(1)} ${unit}`;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`${API}/body-stats`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          weight: Number(formData.weight),
+          bmi: Number(formData.bmi),
+          chest: Number(formData.chest) || 0,
+          waist: Number(formData.waist) || 0,
+          arms: Number(formData.arms) || 0,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save body stats");
+      }
+
+      setFormData({
+        weight: "",
+        bmi: "",
+        chest: "",
+        waist: "",
+        arms: "",
+      });
+
+      setShowForm(false);
+
+      await loadProfileData();
+    } catch (error) {
+      console.error("Save body stats error:", error);
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
-      {/* Profile Header */}
-      <div className="flex flex-col items-center text-center space-y-3 bg-base-200 p-6 md:p-8 rounded-3xl border border-base-300 shadow-sm">
-        {/* Avatar with Upload Camera Button */}
-        <div className="relative">
-          <div className="avatar">
-            <div className="w-24 md:w-28 rounded-full ring ring-primary ring-offset-base-100 ring-offset-4">
-              <img 
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" 
-                alt="Alex Johnson Avatar" 
-              />
-            </div>
-          </div>
-          <button 
-            type="button" 
-            aria-label="Upload Avatar"
-            className="btn btn-circle btn-primary btn-xs absolute bottom-0 right-0 shadow-md hover:scale-110 transition-transform"
-          >
-            <HiCamera className="text-xs text-primary-content" />
-          </button>
-        </div>
-
-        {/* User Info */}
-        <div className="max-w-md">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Alex Johnson</h1>
-          <p className="text-xs md:text-sm text-base-content/70 mt-1.5 leading-relaxed">
-            Fitness enthusiast & powerlifting competitor. Focused on strength gains and aesthetic goals.
-          </p>
-        </div>
-
-        {/* Quick Stats Banner */}
-        <div className="grid grid-cols-3 gap-3 md:gap-6 w-full max-w-lg pt-4">
-          {stats.map((stat) => (
-            <div 
-              key={stat.label} 
-              className="bg-base-100 p-3 md:p-4 rounded-2xl border border-base-300 text-center shadow-sm"
-            >
-              <p className={`text-xl md:text-2xl font-black ${stat.color}`}>
-                {stat.value}
-              </p>
-              <p className="text-[10px] md:text-xs font-bold text-base-content/60 uppercase tracking-wider mt-0.5">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Menu Options List */}
-      <div className="space-y-3">
-        <p className="text-xs font-bold text-base-content/60 uppercase tracking-widest px-1">
-          Account Settings
-        </p>
-
-        {/* Responsive Grid: 1 column on Mobile, 2 columns on Tablet & Desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          {menuOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <Link
-                key={option.id}
-                to={option.path}
-                className="w-full bg-base-200 hover:bg-base-300/70 p-4 rounded-2xl border border-base-300 transition-all duration-200 flex items-center justify-between group shadow-sm"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className={`p-3 rounded-xl ${option.iconBg}`}>
-                    <Icon className="text-xl" />
-                  </div>
-                  <span className="font-semibold text-sm md:text-base group-hover:text-primary transition-colors">
-                    {option.title}
-                  </span>
-                </div>
-                <HiChevronRight className="text-lg text-base-content/40 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Sign Out Button */}
-      <div className="pt-2">
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={handleSignOut}
-          className="w-full btn btn-outline btn-error rounded-2xl border-error/30 hover:border-error flex items-center justify-center gap-2 font-bold py-3 text-sm md:text-base"
+          onClick={() => navigate(-1)}
+          className="btn btn-circle btn-ghost btn-sm bg-base-200 border border-base-300 hover:bg-base-300"
         >
-          <HiLogout className="text-xl" />
-          <span>Sign Out</span>
+          <HiChevronLeft className="text-xl" />
         </button>
+
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight">
+            Body Metrics
+          </h1>
+
+          <p className="text-xs text-base-content/60">
+            {latestStats
+              ? `Last updated: ${new Date(
+                  latestStats.date
+                ).toLocaleDateString()}`
+              : "No body metrics recorded yet"}
+          </p>
+        </div>
       </div>
 
-      {/* Render sub-routes here if needed */}
-      <Outlet />
+      {/* Loading */}
+      {loading && (
+        <div className="flex justify-center py-10">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
+        </div>
+      )}
+
+      {!loading && (
+        <>
+          {/* Profile Summary */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-base-200 p-5 rounded-3xl border border-base-300">
+              <p className="text-xs font-bold text-base-content/60 uppercase">
+                Total Workouts
+              </p>
+
+              <p className="text-3xl font-black mt-2">
+                {totalWorkouts}
+              </p>
+            </div>
+
+            <div className="bg-base-200 p-5 rounded-3xl border border-base-300">
+              <p className="text-xs font-bold text-base-content/60 uppercase">
+                Current Weight
+              </p>
+
+              <p className="text-3xl font-black mt-2">
+                {latestStats ? `${latestStats.weight} kg` : "N/A"}
+              </p>
+            </div>
+
+            <div className="bg-base-200 p-5 rounded-3xl border border-base-300">
+              <p className="text-xs font-bold text-base-content/60 uppercase">
+                Current BMI
+              </p>
+
+              <p className="text-3xl font-black mt-2">
+                {latestStats ? latestStats.bmi : "N/A"}
+              </p>
+            </div>
+          </section>
+
+          {/* Weight Chart */}
+          <section className="bg-base-200 p-5 md:p-6 rounded-3xl border border-base-300">
+            <div className="mb-4">
+              <p className="text-xs font-bold text-base-content/60 uppercase tracking-wider">
+                Weight Progress
+              </p>
+
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-3xl md:text-4xl font-black">
+                  {latestStats ? latestStats.weight : "N/A"}
+                </span>
+
+                {latestStats && (
+                  <span className="text-sm font-bold text-base-content/60">
+                    kg
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="h-64 w-full">
+              {weightData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={weightData}>
+                    <defs>
+                      <linearGradient
+                        id="weightGradient"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="var(--p)"
+                          stopOpacity={0.4}
+                        />
+
+                        <stop
+                          offset="95%"
+                          stopColor="var(--p)"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+
+                    <XAxis
+                      dataKey="date"
+                      fontSize={10}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+
+                    <YAxis
+                      domain={["dataMin - 1", "dataMax + 1"]}
+                      hide
+                    />
+
+                    <Tooltip />
+
+                    <Area
+                      type="monotone"
+                      dataKey="weight"
+                      stroke="#374151"
+                      strokeWidth={3}
+                      fill="url(#weightGradient)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-sm text-base-content/60">
+                  No weight history available
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Measurements */}
+          <section className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-lg">
+                Body Measurements
+              </h3>
+
+              <span className="text-xs text-base-content/60">
+                Latest record
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Chest */}
+              <div className="bg-base-200 p-4 rounded-2xl border border-base-300">
+                <p className="text-xs font-bold text-base-content/60">
+                  CHEST
+                </p>
+
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-xl font-black">
+                    {latestStats?.chest || 0}
+                  </span>
+
+                  <span className="text-xs text-base-content/60">
+                    in
+                  </span>
+                </div>
+
+                <p className="text-xs text-primary font-bold mt-2">
+                  {getChange(
+                    latestStats?.chest,
+                    previousStats?.chest,
+                    "in"
+                  )}
+                </p>
+              </div>
+
+              {/* Waist */}
+              <div className="bg-base-200 p-4 rounded-2xl border border-base-300">
+                <p className="text-xs font-bold text-base-content/60">
+                  WAIST
+                </p>
+
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-xl font-black">
+                    {latestStats?.waist || 0}
+                  </span>
+
+                  <span className="text-xs text-base-content/60">
+                    in
+                  </span>
+                </div>
+
+                <p className="text-xs text-primary font-bold mt-2">
+                  {getChange(
+                    latestStats?.waist,
+                    previousStats?.waist,
+                    "in"
+                  )}
+                </p>
+              </div>
+
+              {/* Arms */}
+              <div className="bg-base-200 p-4 rounded-2xl border border-base-300">
+                <p className="text-xs font-bold text-base-content/60">
+                  ARMS
+                </p>
+
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-xl font-black">
+                    {latestStats?.arms || 0}
+                  </span>
+
+                  <span className="text-xs text-base-content/60">
+                    in
+                  </span>
+                </div>
+
+                <p className="text-xs text-primary font-bold mt-2">
+                  {getChange(
+                    latestStats?.arms,
+                    previousStats?.arms,
+                    "in"
+                  )}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Log New Metrics */}
+          <section>
+            {!showForm ? (
+              <button
+                type="button"
+                onClick={() => setShowForm(true)}
+                className="btn btn-primary w-full py-4 font-bold rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+              >
+                <HiPlus className="text-xl" />
+                <span>LOG NEW METRICS</span>
+              </button>
+            ) : (
+              <div className="bg-base-200 p-5 md:p-6 rounded-3xl border border-base-300">
+                <h3 className="font-bold text-lg mb-4">
+                  Add New Body Metrics
+                </h3>
+
+                <form
+                  onSubmit={handleSubmit}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        Weight (kg)
+                      </span>
+                    </label>
+
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="weight"
+                      value={formData.weight}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        BMI
+                      </span>
+                    </label>
+
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="bmi"
+                      value={formData.bmi}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        Chest (in)
+                      </span>
+                    </label>
+
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="chest"
+                      value={formData.chest}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        Waist (in)
+                      </span>
+                    </label>
+
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="waist"
+                      value={formData.waist}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        Arms (in)
+                      </span>
+                    </label>
+
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="arms"
+                      value={formData.arms}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 flex gap-3 mt-2">
+                    <button
+                      type="submit"
+                      className="btn btn-primary flex-1"
+                    >
+                      Save Metrics
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="btn btn-ghost"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 };
