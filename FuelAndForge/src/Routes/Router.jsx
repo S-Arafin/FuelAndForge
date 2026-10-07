@@ -12,9 +12,8 @@ import Exercises from "../Pages/AuthRequired/Exercises";
 import Routine from "../Pages/AuthRequired/Routine";
 import WorkoutHistory from "../Pages/AuthRequired/WorkoutHistory";
 import Analytics from "../Pages/AuthRequired/Analytics";
-import Nutrition from "../Pages/AuthRequired/Nutrition";
 import Profile from "../Pages/AuthRequired/Profile";
-import BodyStats from "../Pages/AuthRequired/BodyStats";
+import Reports from "../Pages/AuthRequired/Reports";
 
 
 export const router = createBrowserRouter([
@@ -82,23 +81,16 @@ export const router = createBrowserRouter([
                 ]
             },
             {
-                path: "nutrition",
-                element: <Nutrition />
-            },
-            {
                 path: "analytics",
                 element: <Analytics />
             },
             {
-                path: "profile",
+                path: "body-stats",
                 element: <Profile />,
-                children: [
-                    {
-                        path: "body-status",
-                        element: <BodyStats />
-                    },
-                    
-                ]
+            },
+            {
+                path: "reports",
+                element: <Reports />,
             }
         ]
 
