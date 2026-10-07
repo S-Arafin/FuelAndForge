@@ -8,9 +8,9 @@ import PrivateRoute from "../Provider/PrivateRoute";
 import Home from "../Pages/AuthRequired/Home";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import Workout from "../Pages/AuthRequired/Workout";
-import Calisthenics from "../Pages/AuthRequired/Calisthenics";
-import HomeWorkout from "../Pages/AuthRequired/HomeWorkout";
-import WeightTraining from "../Pages/AuthRequired/WeightTraining";
+import Exercises from "../Pages/AuthRequired/Exercises";
+import Routine from "../Pages/AuthRequired/Routine";
+import WorkoutHistory from "../Pages/AuthRequired/WorkoutHistory";
 import Analytics from "../Pages/AuthRequired/Analytics";
 import Nutrition from "../Pages/AuthRequired/Nutrition";
 import Profile from "../Pages/AuthRequired/Profile";
@@ -57,25 +57,27 @@ export const router = createBrowserRouter([
                 element: <Home />
             },
             {
+                path: "workout",
+                element: <Workout />,
+            },
+            {
                 path: "workouts",
                 children: [
                     {
                         index: true,
-                        element: <Workout />
+                        element: <Exercises />
                     },
                     {
-                        path: "weight-training",
-                        element: <WeightTraining />
+                        path: "routine",
+                        element: <Routine />
 
                     },
                     {
-                        path: "calisthenics",
-                        element: <Calisthenics />
+                        path: "history",
+                        element: <WorkoutHistory />
                     },
-                    {
-                        path: "home-workout",
-                        element: <HomeWorkout />
-                    }
+
+
 
                 ]
             },
