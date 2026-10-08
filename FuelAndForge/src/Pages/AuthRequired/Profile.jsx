@@ -29,10 +29,7 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    loadProfileData();
-  }, []);
-
-  const loadProfileData = async () => {
+    const loadProfileData = async () => {
     try {
       setLoading(true);
 
@@ -52,6 +49,10 @@ const Profile = () => {
       setLoading(false);
     }
   };
+    loadProfileData();
+  }, []);
+
+  
 
   const sortedStats = [...bodyStats].sort(
     (a, b) => new Date(a.date) - new Date(b.date)
@@ -106,42 +107,50 @@ const Profile = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch(`${API}/body-stats`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          weight: Number(formData.weight),
-          bmi: Number(formData.bmi),
-          chest: Number(formData.chest) || 0,
-          waist: Number(formData.waist) || 0,
-          arms: Number(formData.arms) || 0,
-        }),
-      });
+  try {
+    const response = await fetch(`${API}/body-stats`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        weight: Number(formData.weight),
+        bmi: Number(formData.bmi),
+        chest: Number(formData.chest) || 0,
+        waist: Number(formData.waist) || 0,
+        arms: Number(formData.arms) || 0,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to save body stats");
-      }
-
-      setFormData({
-        weight: "",
-        bmi: "",
-        chest: "",
-        waist: "",
-        arms: "",
-      });
-
-      setShowForm(false);
-
-      await loadProfileData();
-    } catch (error) {
-      console.error("Save body stats error:", error);
+    if (!response.ok) {
+      throw new Error("Failed to save body stats");
     }
-  };
+
+    setFormData({
+      weight: "",
+      bmi: "",
+      chest: "",
+      waist: "",
+      arms: "",
+    });
+
+    setShowForm(false);
+
+    const bodyStatsResponse = await fetch(`${API}/body-stats`);
+
+    if (!bodyStatsResponse.ok) {
+      throw new Error("Failed to reload body stats");
+    }
+
+    const updatedBodyStats = await bodyStatsResponse.json();
+
+    setBodyStats(updatedBodyStats);
+  } catch (error) {
+    console.error("Save body stats error:", error);
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
